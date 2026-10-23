@@ -4,6 +4,7 @@ dist/
 release/
 .todesktop/
 .worktrees/
+.qwen/
 .DS_Store
 
 # Local configuration and secrets
