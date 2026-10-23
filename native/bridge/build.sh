@@ -64,6 +64,23 @@ build_architecture() {
     --arch "${swift_arch}" \
     --show-bin-path)"
 
+  # Newer SwiftPM toolchains emit modules and objects directly in the bin path
+  # (ActivityCore.swiftmodule/ and ActivityCore.o); older ones use Modules/ and
+  # per-target <Target>.build/ object directories. Support both layouts.
+  if [ -d "${bin_path}/Modules" ]; then
+    module_include="${bin_path}/Modules"
+  else
+    module_include="${bin_path}"
+  fi
+  if [ -f "${bin_path}/ActivityCore.build/ActivityEvent.swift.o" ]; then
+    activity_core_objects="${bin_path}/ActivityCore.build/ActivityEvent.swift.o ${bin_path}/ActivityCore.build/EventWriter.swift.o ${bin_path}/ActivityCore.build/SemanticObservation.swift.o ${bin_path}/ActivityCore.build/SemanticProtectionPolicy.swift.o"
+  elif [ -f "${bin_path}/ActivityCore.o" ]; then
+    activity_core_objects="${bin_path}/ActivityCore.o"
+  else
+    echo "ActivityCore build products were not found in ${bin_path}" >&2
+    exit 1
+  fi
+
   xcrun swiftc \
     -target "${swift_arch}-apple-macos14.0" \
     -parse-as-library \
@@ -71,16 +88,13 @@ build_architecture() {
     "${optimization}" \
     -D OPENHISTORY_EMBEDDED_COLLECTOR \
     -module-name OpenHistoryCollectorBridge \
-    -I "${bin_path}/Modules" \
+    -I "${module_include}" \
     native/collector/Sources/ActivityCollector/AccessibilityEventMonitor.swift \
     native/collector/Sources/ActivityCollector/AccessibilityReader.swift \
     native/collector/Sources/ActivityCollector/PointerEventTap.swift \
     native/collector/Sources/ActivityCollector/CollectorRuntime.swift \
     native/bridge/EmbeddedCollectorBridge.swift \
-    "${bin_path}/ActivityCore.build/ActivityEvent.swift.o" \
-    "${bin_path}/ActivityCore.build/EventWriter.swift.o" \
-    "${bin_path}/ActivityCore.build/SemanticObservation.swift.o" \
-    "${bin_path}/ActivityCore.build/SemanticProtectionPolicy.swift.o" \
+    ${activity_core_objects} \
     -Xlinker -install_name \
     -Xlinker @rpath/libOpenHistoryCollector.dylib \
     -o "${architecture_root}/libOpenHistoryCollector.dylib"

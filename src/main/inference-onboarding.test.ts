@@ -85,6 +85,59 @@ test("rejects unlisted providers and models", () => {
   }), /supported model/);
 });
 
+test("accepts a custom endpoint with an explicit model name", () => {
+  assert.deepEqual(normalizeInferenceOnboardingSelection({
+    provider: "custom",
+    model: "  llama3.1  ",
+    apiKey: "sk-synthetic",
+    customEndpoint: "http://localhost:11434"
+  }), {
+    provider: "custom",
+    model: "llama3.1",
+    apiKey: "sk-synthetic",
+    customEndpoint: "http://localhost:11434/v1",
+    captureEmailActivity: false,
+    captureMessagingActivity: false,
+    appPresentationMode: "dock"
+  });
+});
+
+test("preserves explicit paths and trailing slashes in the custom endpoint", () => {
+  const selection = normalizeInferenceOnboardingSelection({
+    provider: "custom",
+    model: "llama3.1",
+    apiKey: "sk-synthetic",
+    customEndpoint: "https://gateway.example.com/v1/"
+  });
+  assert.equal(selection.customEndpoint, "https://gateway.example.com/v1");
+});
+
+test("rejects an incomplete or invalid custom endpoint", () => {
+  assert.throws(() => normalizeInferenceOnboardingSelection({
+    provider: "custom",
+    model: "llama3.1",
+    apiKey: "sk-synthetic"
+  }), /endpoint URL/);
+  assert.throws(() => normalizeInferenceOnboardingSelection({
+    provider: "custom",
+    model: "",
+    apiKey: "sk-synthetic",
+    customEndpoint: "http://localhost:11434"
+  }), /model name/);
+  assert.throws(() => normalizeInferenceOnboardingSelection({
+    provider: "custom",
+    model: "llama3.1",
+    apiKey: "sk-synthetic",
+    customEndpoint: "not a url"
+  }), /valid http or https/);
+  assert.throws(() => normalizeInferenceOnboardingSelection({
+    provider: "custom",
+    model: "llama3.1",
+    apiKey: "sk-synthetic",
+    customEndpoint: "ftp://localhost:11434"
+  }), /valid http or https/);
+});
+
 test("blocks unavailable Apple inference during onboarding", () => {
   const selection = normalizeInferenceOnboardingSelection({
     provider: "apple",

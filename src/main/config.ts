@@ -9,6 +9,7 @@ export interface RuntimeConfig {
   adoptExistingDataDirectory: boolean;
   inferenceApiKeys: Record<InferenceProvider, string | undefined>;
   inferenceModels: Record<InferenceProvider, string>;
+  inferenceCustomEndpoint?: string;
   mcpPort: number;
 }
 
@@ -48,14 +49,17 @@ export function getRuntimeConfig(): RuntimeConfig {
       apple: undefined,
       openai: process.env.OPENAI_API_KEY?.trim() || undefined,
       anthropic: process.env.ANTHROPIC_API_KEY?.trim() || undefined,
-      kimi: process.env.MOONSHOT_API_KEY?.trim() || undefined
+      kimi: process.env.MOONSHOT_API_KEY?.trim() || undefined,
+      custom: process.env.OPENHISTORY_CUSTOM_API_KEY?.trim() || undefined
     },
     inferenceModels: {
       apple: "system-default",
       openai: process.env.OPENAI_MODEL?.trim() || "gpt-5.6-luna",
       anthropic: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-5",
-      kimi: process.env.MOONSHOT_MODEL?.trim() || "kimi-k3"
+      kimi: process.env.MOONSHOT_MODEL?.trim() || "kimi-k3",
+      custom: process.env.OPENHISTORY_CUSTOM_MODEL?.trim() || ""
     },
+    inferenceCustomEndpoint: process.env.OPENHISTORY_CUSTOM_BASE_URL?.trim() || undefined,
     mcpPort: localPort(process.env.OPENHISTORY_MCP_PORT)
   };
 }

@@ -44,6 +44,18 @@ test("keeps credentials isolated by provider", async (context) => {
   assert.notEqual(kimi.load(), undefined);
 });
 
+test("accepts placeholder credentials for a custom endpoint but not for hosted providers", async (context) => {
+  const directory = await testDirectory(context);
+  const custom = new ApiKeyStore(directory, encryption, "custom");
+  const openAI = new ApiKeyStore(directory, encryption, "openai");
+
+  custom.save("ollama");
+  assert.equal(custom.load(), "ollama");
+
+  assert.throws(() => openAI.save("sk-short"), /Invalid API key/);
+  assert.throws(() => custom.save("   "), /Invalid API key/);
+});
+
 async function testDirectory(context: TestContext): Promise<string> {
   const directory = await mkdtemp(resolve(tmpdir(), "openhistory-api-key-"));
   context.after(() => rmSync(directory, { recursive: true, force: true }));

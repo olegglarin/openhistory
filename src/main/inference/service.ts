@@ -89,6 +89,10 @@ export class InferenceService {
     if (this.settings.enabled && this.settings.provider === "apple") {
       return probeAppleFoundationModel().reason ?? "Apple's on-device model is unavailable.";
     }
+    if (this.settings.enabled && this.settings.provider === "custom" &&
+        (!this.settings.customEndpoint?.trim() || !this.settings.models.custom.trim())) {
+      return "The custom endpoint is incomplete. Add its URL and model name in Settings.";
+    }
     return this.settings.enabled
       ? "No inference API key is configured. Add one in Settings."
       : "Automatic summaries are turned off in Settings.";
@@ -107,9 +111,25 @@ export class InferenceService {
         : undefined;
       return;
     }
-    this.adapter = apiKey
-      ? createInferenceProvider({ apiKey, provider: settings.provider, model: settings.models[settings.provider] })
-      : undefined;
+    const model = settings.models[settings.provider];
+    if (!apiKey || !model.trim()) {
+      this.adapter = undefined;
+      return;
+    }
+    if (settings.provider === "custom") {
+      const endpoint = settings.customEndpoint?.trim();
+      if (!endpoint) {
+        this.adapter = undefined;
+        return;
+      }
+      try {
+        this.adapter = createInferenceProvider({ apiKey, baseUrl: endpoint, model, provider: "custom" });
+      } catch {
+        this.adapter = undefined;
+      }
+      return;
+    }
+    this.adapter = createInferenceProvider({ apiKey, model, provider: settings.provider });
   }
 
   async summarizeEpisode(

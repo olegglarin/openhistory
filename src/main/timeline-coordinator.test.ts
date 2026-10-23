@@ -98,6 +98,43 @@ test("holds a short work burst until its eight-minute window has elapsed", async
   }
 });
 
+test("summarizes the newest pending episodes first when a backlog exists", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "openhistory-timeline-coordinator-"));
+  try {
+    const entries = Array.from({ length: 10 }, (_, index) =>
+      event(`episode-${index + 1}`, `2026-08-14T${String(9 + Math.floor(index / 2)).padStart(2, "0")}:${index % 2 === 0 ? "00" : "30"}:00Z`)
+    );
+    writeFileSync(
+      join(directory, "events-2026-08-14.jsonl"),
+      entries.map((entry) => JSON.stringify(entry)).join("\n")
+    );
+
+    const calls: string[] = [];
+    const inference = {
+      configured: true,
+      provider: "openai" as const,
+      unavailableMessage: "Unavailable",
+      summarizeEpisode: async (episode: ActivityEpisode): Promise<TimelineItem> => {
+        calls.push(episode.startTime);
+        return timelineItem(episode);
+      }
+    } as unknown as InferenceService;
+    const coordinator = new TimelineCoordinator(
+      directory,
+      new TimelineStore(join(directory, "timeline")),
+      inference
+    );
+
+    const state = await coordinator.summarizePending();
+    assert.equal(calls.length, 8);
+    assert.equal(calls[0], "2026-08-14T10:00:00Z");
+    assert.equal(calls[7], "2026-08-14T13:30:00Z");
+    assert.equal(state.pendingEpisodeCount, 2);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 function event(id: string, timestamp: string): ActivityEvent {
   return {
     version: 1,

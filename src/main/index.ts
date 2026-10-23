@@ -17,6 +17,7 @@ import {
   INFERENCE_PROVIDERS,
   isCloudInferenceProvider,
   isInferenceProvider,
+  normalizeCustomEndpoint,
   type AppleInferenceAvailability,
   type CloudInferenceProvider,
   type ApiKeySource,
@@ -110,7 +111,8 @@ let apiKeySources: Record<InferenceProvider, ApiKeySource> = {
   apple: "none",
   openai: "none",
   anthropic: "none",
-  kimi: "none"
+  kimi: "none",
+  custom: "none"
 };
 let environmentApiKeys: Record<InferenceProvider, string | undefined>;
 let hour: HourCoordinator;
@@ -578,7 +580,11 @@ async function initialize(): Promise<void> {
     provider,
     apiKeyStores[provider].load() ? "saved" : environmentApiKeys[provider] ? "environment" : "none"
   ])) as Record<InferenceProvider, ApiKeySource>;
-  inferenceSettingsStore = new InferenceSettingsStore(config.dataDirectory, config.inferenceModels);
+  inferenceSettingsStore = new InferenceSettingsStore(
+    config.dataDirectory,
+    config.inferenceModels,
+    config.inferenceCustomEndpoint
+  );
   inferenceSettings = inferenceSettingsStore.load();
   settingsStore = new SettingsStore(config.dataDirectory);
   const settings = settingsStore.load();
@@ -715,6 +721,9 @@ async function initialize(): Promise<void> {
     if (cloudInferenceNeedsApiKey(next, activeApiKey(next.provider))) {
       throw new Error(`${next.provider} requires an API key`);
     }
+    if (next.enabled && next.provider === "custom" && next.customEndpoint?.trim()) {
+      normalizeCustomEndpoint(next.customEndpoint);
+    }
     if (historyBuildPromise) await historyBuildPromise;
     inferenceSettings = inferenceSettingsStore.save(next);
     inference.configure(inferenceSettings, activeApiKey(inferenceSettings.provider));
@@ -790,7 +799,8 @@ async function initialize(): Promise<void> {
       models: {
         ...inferenceSettings.models,
         [selection.provider]: selection.model
-      }
+      },
+      ...(selection.customEndpoint ? { customEndpoint: selection.customEndpoint } : {})
     });
     inference.configure(inferenceSettings, activeApiKey(selection.provider));
     const savedSettings = settingsStore.save({

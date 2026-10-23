@@ -17,12 +17,14 @@ const StoredApiKeySchema = z.object({
 
 export class ApiKeyStore {
   private readonly path: string;
+  private readonly provider: InferenceProvider;
 
   constructor(
     dataDirectory: string,
     private readonly encryption: EncryptionProvider,
     provider: InferenceProvider = "openai"
   ) {
+    this.provider = provider;
     this.path = resolve(dataDirectory, `${provider}-credential.json`);
   }
 
@@ -44,7 +46,9 @@ export class ApiKeyStore {
       throw new Error("Secure API key storage is unavailable");
     }
     const normalized = apiKey.trim();
-    if (normalized.length < 20 || normalized.length > 500) throw new Error("Invalid API key");
+    // Local OpenAI-compatible servers commonly accept placeholder credentials.
+    const minimumLength = this.provider === "custom" ? 1 : 20;
+    if (normalized.length < minimumLength || normalized.length > 500) throw new Error("Invalid API key");
     const ciphertext = this.encryption.encryptString(normalized).toString("base64");
     writePrivateFile(this.path, `${JSON.stringify({ version: 1, ciphertext }, null, 2)}\n`);
   }

@@ -14,11 +14,11 @@ test("diagnostics omit activity content, local paths, errors, and credentials", 
         version: 1,
         enabled: true,
         provider: "openai",
-        models: { apple: "system-default", openai: "gpt-test", anthropic: "a", kimi: "k" }
+        models: { apple: "system-default", openai: "gpt-test", anthropic: "a", kimi: "k", custom: "c" }
       },
       configured: true,
       appleAvailability: { available: false, reason: secret },
-      keySources: { apple: "none", openai: "saved", anthropic: "none", kimi: "none" }
+      keySources: { apple: "none", openai: "saved", anthropic: "none", kimi: "none", custom: "none" }
     },
     recentEvents: [{ id: secret }],
     timeline: { items: [{ title: secret }], pendingEpisodeCount: 1, summarizing: false, lastError: secret },

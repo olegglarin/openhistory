@@ -1,4 +1,6 @@
 import {
+  CUSTOM_ENDPOINT_MAX_LENGTH,
+  CUSTOM_MODEL_MAX_LENGTH,
   DEFAULT_INFERENCE_MODELS,
   INFERENCE_PROVIDERS,
   type InferenceProvider,
@@ -11,6 +13,7 @@ import { writePrivateFile } from "./private-storage";
 
 const InferenceProviderSchema = z.enum(INFERENCE_PROVIDERS);
 const ModelSchema = z.string().trim().min(1).max(200);
+const CustomModelSchema = z.string().trim().max(CUSTOM_MODEL_MAX_LENGTH);
 const InferenceSettingsSchema = z.object({
   version: z.literal(1),
   enabled: z.boolean(),
@@ -19,16 +22,23 @@ const InferenceSettingsSchema = z.object({
     apple: ModelSchema.default(DEFAULT_INFERENCE_MODELS.apple),
     openai: ModelSchema,
     anthropic: ModelSchema,
-    kimi: ModelSchema
-  }).strict()
+    kimi: ModelSchema,
+    custom: CustomModelSchema.default(DEFAULT_INFERENCE_MODELS.custom)
+  }).strict(),
+  customEndpoint: z.string().trim().max(CUSTOM_ENDPOINT_MAX_LENGTH).optional()
 }).strict();
 
 export class InferenceSettingsStore {
   private readonly path: string;
   private readonly defaults: InferenceSettings;
 
-  constructor(dataDirectory: string, modelDefaults?: Partial<Record<InferenceProvider, string>>) {
+  constructor(
+    dataDirectory: string,
+    modelDefaults?: Partial<Record<InferenceProvider, string>>,
+    customEndpoint?: string
+  ) {
     this.path = resolve(dataDirectory, "inference-settings.json");
+    const endpoint = normalizedCustomEndpoint(customEndpoint);
     this.defaults = {
       version: 1,
       enabled: true,
@@ -36,7 +46,8 @@ export class InferenceSettingsStore {
       models: {
         ...DEFAULT_INFERENCE_MODELS,
         ...normalizedModelDefaults(modelDefaults)
-      }
+      },
+      ...(endpoint ? { customEndpoint: endpoint } : {})
     };
   }
 
@@ -69,4 +80,9 @@ function normalizedModelDefaults(
       return normalized ? [[provider, normalized]] : [];
     })
   );
+}
+
+function normalizedCustomEndpoint(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+  return normalized || undefined;
 }

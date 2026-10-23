@@ -1,8 +1,11 @@
 import type { InferenceOnboardingSelection } from "@shared/contracts";
 import {
+  CUSTOM_ENDPOINT_MAX_LENGTH,
+  CUSTOM_MODEL_MAX_LENGTH,
   INFERENCE_MODEL_OPTIONS,
   isCloudInferenceProvider,
   isInferenceProvider,
+  normalizeCustomEndpoint,
   type AppleInferenceAvailability
 } from "@shared/inference";
 
@@ -14,7 +17,10 @@ export function normalizeInferenceOnboardingSelection(
   if (!isInferenceProvider(candidate.provider)) throw new Error("Invalid inference provider");
 
   const model = typeof candidate.model === "string" ? candidate.model.trim() : "";
-  if (!INFERENCE_MODEL_OPTIONS[candidate.provider].some((option) => option.id === model)) {
+  if (candidate.provider === "custom") {
+    if (!model) throw new Error("Enter a model name for the custom endpoint");
+    if (model.length > CUSTOM_MODEL_MAX_LENGTH) throw new Error("Model name is too long");
+  } else if (!INFERENCE_MODEL_OPTIONS[candidate.provider].some((option) => option.id === model)) {
     throw new Error("Choose a supported model");
   }
   if (candidate.captureEmailActivity !== undefined &&
@@ -43,7 +49,22 @@ export function normalizeInferenceOnboardingSelection(
   const apiKey = typeof candidate.apiKey === "string" ? candidate.apiKey.trim() : "";
   if (!apiKey) throw new Error(`${candidate.provider} requires an API key`);
   if (apiKey.length > 10_000) throw new Error("API key is too long");
-  return { provider: candidate.provider, model, apiKey, ...captureSelections };
+
+  let customEndpoint: string | undefined;
+  if (candidate.provider === "custom") {
+    customEndpoint = normalizeCustomEndpoint(
+      typeof candidate.customEndpoint === "string" ? candidate.customEndpoint : ""
+    );
+    if (customEndpoint.length > CUSTOM_ENDPOINT_MAX_LENGTH) throw new Error("Endpoint URL is too long");
+  }
+
+  return {
+    provider: candidate.provider,
+    model,
+    apiKey,
+    ...(customEndpoint ? { customEndpoint } : {}),
+    ...captureSelections
+  };
 }
 
 export function assertInferenceOnboardingAvailability(

@@ -1,5 +1,5 @@
-export const INFERENCE_PROVIDERS = ["apple", "openai", "anthropic", "kimi"] as const;
-export const CLOUD_INFERENCE_PROVIDERS = ["openai", "anthropic", "kimi"] as const;
+export const INFERENCE_PROVIDERS = ["apple", "openai", "anthropic", "kimi", "custom"] as const;
+export const CLOUD_INFERENCE_PROVIDERS = ["openai", "anthropic", "kimi", "custom"] as const;
 
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 export type CloudInferenceProvider = (typeof CLOUD_INFERENCE_PROVIDERS)[number];
@@ -10,6 +10,7 @@ export interface InferenceSettings {
   enabled: boolean;
   provider: InferenceProvider;
   models: Record<InferenceProvider, string>;
+  customEndpoint?: string;
 }
 
 export interface InferenceState {
@@ -104,7 +105,8 @@ export const INFERENCE_PROVIDER_LABELS: Record<InferenceProvider, string> = {
   apple: "Apple On-Device (Experimental)",
   openai: "OpenAI",
   anthropic: "Anthropic",
-  kimi: "Kimi (Moonshot AI)"
+  kimi: "Kimi (Moonshot AI)",
+  custom: "Custom"
 };
 
 export const INFERENCE_MODEL_OPTIONS: Record<InferenceProvider, InferenceModelOption[]> = {
@@ -123,15 +125,41 @@ export const INFERENCE_MODEL_OPTIONS: Record<InferenceProvider, InferenceModelOp
   ],
   kimi: [
     { id: "kimi-k3", label: "Kimi K3", description: "Flagship model" }
-  ]
+  ],
+  custom: []
 };
 
 export const DEFAULT_INFERENCE_MODELS: Record<InferenceProvider, string> = {
   apple: "system-default",
   openai: "gpt-5.6-luna",
   anthropic: "claude-sonnet-5",
-  kimi: "kimi-k3"
+  kimi: "kimi-k3",
+  custom: ""
 };
+
+export const CUSTOM_MODEL_MAX_LENGTH = 200;
+export const CUSTOM_ENDPOINT_MAX_LENGTH = 2_048;
+
+/**
+ * Normalize a user-supplied OpenAI-compatible endpoint into the SDK base URL.
+ * Bare hosts (for example "http://localhost:11434") get the conventional "/v1"
+ * suffix; paths already present in the URL are preserved as entered.
+ */
+export function normalizeCustomEndpoint(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) throw new Error("Enter an endpoint URL for the custom provider");
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error("Enter a valid http or https endpoint URL");
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error("Enter a valid http or https endpoint URL");
+  }
+  const base = `${url.origin}${url.pathname}`.replace(/\/+$/, "");
+  return url.pathname.length > 1 ? base : `${base}/v1`;
+}
 
 export function isInferenceProvider(value: unknown): value is InferenceProvider {
   return typeof value === "string" && INFERENCE_PROVIDERS.includes(value as InferenceProvider);

@@ -322,6 +322,7 @@ export interface InferenceOnboardingSelection {
   provider: InferenceProvider;
   model: string;
   apiKey?: string;
+  customEndpoint?: string;
   captureEmailActivity?: boolean;
   captureMessagingActivity?: boolean;
   appPresentationMode?: AppPresentationMode;

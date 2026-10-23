@@ -125,7 +125,7 @@ test("can disable inference and switch direct providers without exposing credent
     version: 1 as const,
     enabled: false,
     provider: "openai" as const,
-    models: { apple: "system-default", openai: "gpt-5.6-luna", anthropic: "claude-sonnet-5", kimi: "kimi-k3" }
+    models: { apple: "system-default", openai: "gpt-5.6-luna", anthropic: "claude-sonnet-5", kimi: "kimi-k3", custom: "" }
   };
   const service = new InferenceService({ apiKey: "sk-test-secret-that-is-long-enough", settings });
   assert.equal(service.configured, false);
@@ -135,6 +135,22 @@ test("can disable inference and switch direct providers without exposing credent
   assert.equal(service.configured, true);
   assert.equal(service.provider, "anthropic");
   assert.equal(service.model, "claude-sonnet-5");
+});
+
+test("configures a custom endpoint provider once its details are complete", () => {
+  const base = {
+    version: 1 as const,
+    enabled: true,
+    provider: "custom" as const,
+    models: { apple: "system-default", openai: "unused", anthropic: "unused", kimi: "unused", custom: "llama3.1" }
+  };
+  const service = new InferenceService({ apiKey: "sk-test-secret", settings: { ...base } });
+  assert.equal(service.configured, false);
+  assert.match(service.unavailableMessage, /custom endpoint is incomplete/i);
+
+  service.configure({ ...base, customEndpoint: "http://localhost:11434" }, "sk-test-secret");
+  assert.equal(service.configured, true);
+  assert.equal(service.model, "llama3.1");
 });
 
 test("retries malformed structured output once with a larger output budget", async () => {
@@ -159,7 +175,8 @@ test("retries malformed structured output once with a larger output budget", asy
         apple: "system-default",
         openai: "synthetic-openai",
         anthropic: "synthetic-anthropic",
-        kimi: "synthetic-kimi"
+        kimi: "synthetic-kimi",
+        custom: "synthetic-custom"
       }
     }
   });
@@ -204,7 +221,8 @@ test("falls back when captured application names are blank", async () => {
         apple: "system-default",
         openai: "synthetic-openai",
         anthropic: "synthetic-anthropic",
-        kimi: "synthetic-kimi"
+        kimi: "synthetic-kimi",
+        custom: "synthetic-custom"
       }
     }
   });

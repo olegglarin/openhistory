@@ -14,6 +14,18 @@ test("defaults to enabled OpenAI inference while honoring environment model defa
   assert.equal(settings.models.openai, "custom-openai-model");
   assert.equal(settings.models.anthropic, "claude-sonnet-5");
   assert.equal(settings.models.kimi, "kimi-k3");
+  assert.equal(settings.models.custom, "");
+  assert.equal(settings.customEndpoint, undefined);
+});
+
+test("seeds the custom endpoint from an environment default", async (context) => {
+  const directory = await testDirectory(context);
+  const settings = new InferenceSettingsStore(
+    directory,
+    undefined,
+    "http://localhost:11434"
+  ).load();
+  assert.equal(settings.customEndpoint, "http://localhost:11434");
 });
 
 test("persists provider, model, and disabled state", async (context) => {
@@ -27,7 +39,8 @@ test("persists provider, model, and disabled state", async (context) => {
       apple: "system-default",
       openai: "gpt-5.6-terra",
       anthropic: "claude-haiku-4-5",
-      kimi: "kimi-k3"
+      kimi: "kimi-k3",
+      custom: ""
     }
   });
   assert.deepEqual(store.load(), {
@@ -38,8 +51,40 @@ test("persists provider, model, and disabled state", async (context) => {
       apple: "system-default",
       openai: "gpt-5.6-terra",
       anthropic: "claude-haiku-4-5",
-      kimi: "kimi-k3"
+      kimi: "kimi-k3",
+      custom: ""
     }
+  });
+});
+
+test("persists a custom endpoint and model selection", async (context) => {
+  const directory = await testDirectory(context);
+  const store = new InferenceSettingsStore(directory);
+  store.save({
+    version: 1,
+    enabled: true,
+    provider: "custom",
+    models: {
+      apple: "system-default",
+      openai: "gpt-5.6-luna",
+      anthropic: "claude-sonnet-5",
+      kimi: "kimi-k3",
+      custom: "llama3.1"
+    },
+    customEndpoint: "http://localhost:11434/v1"
+  });
+  assert.deepEqual(store.load(), {
+    version: 1,
+    enabled: true,
+    provider: "custom",
+    models: {
+      apple: "system-default",
+      openai: "gpt-5.6-luna",
+      anthropic: "claude-sonnet-5",
+      kimi: "kimi-k3",
+      custom: "llama3.1"
+    },
+    customEndpoint: "http://localhost:11434/v1"
   });
 });
 

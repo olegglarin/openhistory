@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         <p>This marketing website uses Google Analytics to measure page visits and interactions such as navigation, downloads, and outbound-link clicks. Website analytics do not include activity collected by the OpenHistory Mac app. Click events use predefined labels and destination paths; URL query parameters and arbitrary page text are not sent as click-event fields.</p>
 
         <h2>On-device versus cloud</h2>
-        <p>Apple On-Device inference is experimental and keeps evidence on a compatible Mac. OpenAI, Anthropic, and Kimi are optional cloud providers. Before one is enabled, OpenHistory separately asks permission and explains that selected session evidence will be sent directly to that provider. Saving an API key alone does not authorize transmission.</p>
+        <p>Apple On-Device inference is experimental and keeps evidence on a compatible Mac. OpenAI, Anthropic, Kimi, and a custom OpenAI-compatible endpoint are optional cloud providers. Before one is enabled, OpenHistory separately asks permission and explains that selected session evidence will be sent directly to that provider (or, for the custom option, only to the endpoint you configure). Saving an API key alone does not authorize transmission.</p>
 
         <h2>Deletion and diagnostics</h2>
         <p><strong>Delete all local data</strong> removes the app-owned activity directory—including history, summaries, settings, keys, and agent connections—after a native confirmation. Safe diagnostics include versions, settings, status, and counts, but exclude activity content, exact paths, error messages, API keys, and agent credentials.</p>

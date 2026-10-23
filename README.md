@@ -47,7 +47,7 @@ OpenHistory leaves you with a useful memory of the day without taking screenshot
 - **An automatic work timeline.** Permitted foreground activity is grouped into clear work summaries.
 - **Hourly and daily recaps.** OpenHistory turns work summaries into a history you can scan later.
 - **Searchable out of the box.** Find past work immediately with built-in history search.
-- **Choose your own inference.** Use Apple's experimental on-device model for maximum privacy—or connect OpenAI, Anthropic, or Kimi. Or simply turn off automatic summaries to keep just your logs.
+- **Choose your own inference.** Use Apple's experimental on-device model for maximum privacy—or connect OpenAI, Anthropic, Kimi, or any OpenAI-compatible endpoint you host. Or simply turn off automatic summaries to keep just your logs.
 - **Controlled agent access.** Local AI tools can search a redacted, read-only view through an authenticated MCP server.
 
 ## Privacy at a glance
@@ -70,7 +70,7 @@ During first-run setup, email activity and recognized Messages/iMessage and chat
 
 The easiest way to get started is to [**download OpenHistory for Mac →**](https://openhistory.sh). No Node.js or Xcode setup is required.
 
-OpenHistory requires macOS 14 or later. Apple's on-device summaries require Apple Intelligence on macOS 26 or later; OpenAI, Anthropic, and Kimi are available as optional alternatives.
+OpenHistory requires macOS 14 or later. Apple's on-device summaries require Apple Intelligence on macOS 26 or later; OpenAI, Anthropic, Kimi, and a custom OpenAI-compatible endpoint are available as optional alternatives.
 
 ### Build from source
 
@@ -146,7 +146,7 @@ Inference inputs, prompts, schemas, limits, providers, and the native worker pro
 - Collection can be paused at any time.
 - When automatic summaries are enabled and the selected provider has an API key, completed episode evidence is sent directly to that provider about every 10 minutes.
 - Chat requests send the conversation and relevant retrieved evidence to the configured cloud provider; questions about very recent work can include privacy-filtered activity not yet covered by a timeline summary.
-- OpenAI requests use `store: false`; Anthropic and Kimi requests are governed by their respective API data policies.
+- OpenAI requests use `store: false`; Anthropic and Kimi requests are governed by their respective API data policies; custom endpoint requests are governed by the operator of the endpoint you configure.
 - Credentials and credential-shaped text are redacted before persistence or projection.
 - Raw activity is excluded from the MCP projection.
 - Agent credentials are random, independently revocable, and stored only as SHA-256 hashes.

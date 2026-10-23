@@ -617,6 +617,12 @@ const INFERENCE_ONBOARDING_COPY: Record<InferenceProvider, {
     description: "A capable alternative cloud provider with one streamlined model choice.",
     drawback: "Requires an API key. Selected activity evidence is sent to Moonshot AI.",
     name: "Kimi"
+  },
+  custom: {
+    badge: "Your endpoint",
+    description: "Point OpenHistory at any OpenAI-compatible API — a local model server or a hosted gateway.",
+    drawback: "Requires an endpoint URL, model name, and API key. Evidence is sent only to the endpoint you choose.",
+    name: "Custom"
   }
 };
 
@@ -630,7 +636,10 @@ function ProviderLogo({ provider }: { provider: InferenceProvider }): React.JSX.
   if (provider === "anthropic") {
     return <svg viewBox="0 0 24 24"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" /></svg>;
   }
-  return <svg viewBox="0 0 24 24"><path d="M21.846 0a1.923 1.923 0 110 3.846H20.15a.226.226 0 01-.227-.226V1.923C19.923.861 20.784 0 21.846 0zM11.065 11.199l7.257-7.2c.137-.136.06-.41-.116-.41H14.3a.164.164 0 00-.117.051l-7.82 7.756c-.122.12-.302.013-.302-.179V3.82c0-.127-.083-.23-.185-.23H3.186c-.103 0-.186.103-.186.23V19.77c0 .128.083.23.186.23h2.69c.103 0 .186-.102.186-.23v-3.25c0-.069.025-.135.069-.178l2.424-2.406a.158.158 0 01.205-.023l6.484 4.772a7.677 7.677 0 003.453 1.283c.108.012.2-.095.2-.23v-3.06c0-.117-.07-.212-.164-.227a5.028 5.028 0 01-2.027-.807l-5.613-4.064c-.117-.078-.132-.279-.028-.381z" /></svg>;
+  if (provider === "kimi") {
+    return <svg viewBox="0 0 24 24"><path d="M21.846 0a1.923 1.923 0 110 3.846H20.15a.226.226 0 01-.227-.226V1.923C19.923.861 20.784 0 21.846 0zM11.065 11.199l7.257-7.2c.137-.136.06-.41-.116-.41H14.3a.164.164 0 00-.117.051l-7.82 7.756c-.122.12-.302.013-.302-.179V3.82c0-.127-.083-.23-.185-.23H3.186c-.103 0-.186.103-.186.23V19.77c0 .128.083.23.186.23h2.69c.103 0 .186-.102.186-.23v-3.25c0-.069.025-.135.069-.178l2.424-2.406a.158.158 0 01.205-.023l6.484 4.772a7.677 7.677 0 003.453 1.283c.108.012.2-.095.2-.23v-3.06c0-.117-.07-.212-.164-.227a5.028 5.028 0 01-2.027-.807l-5.613-4.064c-.117-.078-.132-.279-.028-.381z" /></svg>;
+  }
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0V7zM12 16v5" /></svg>;
 }
 
 function BadgeIcon({ kind }: { kind: "experimental" | "recommended" }): React.JSX.Element {
@@ -651,6 +660,7 @@ function InferenceOnboarding({
   const [provider, setProvider] = useState<InferenceProvider>();
   const [model, setModel] = useState("");
   const [apiKey, setApiKey] = useState("");
+  const [customEndpoint, setCustomEndpoint] = useState("");
   const [step, setStep] = useState<"model" | "capture" | "presentation">("model");
   const [captureEmailActivity, setCaptureEmailActivity] = useState(true);
   const [captureMessagingActivity, setCaptureMessagingActivity] = useState(true);
@@ -660,11 +670,17 @@ function InferenceOnboarding({
   const [error, setError] = useState<string>();
   const cloudProvider = provider && isCloudInferenceProvider(provider) ? provider : undefined;
   const appleUnavailable = provider === "apple" && !appleAvailability.available;
+  const customIncomplete = provider === "custom" &&
+    (!customEndpoint.trim() || !model.trim());
+  const cloudDestination = provider && isCloudInferenceProvider(provider)
+    ? (provider === "custom" ? "the endpoint you specified" : INFERENCE_PROVIDER_LABELS[provider])
+    : "";
 
   function chooseProvider(next: InferenceProvider): void {
     setProvider(next);
     setModel(DEFAULT_INFERENCE_MODELS[next]);
     setApiKey("");
+    setCustomEndpoint("");
     setError(undefined);
   }
 
@@ -672,11 +688,13 @@ function InferenceOnboarding({
     setProvider(undefined);
     setModel("");
     setApiKey("");
+    setCustomEndpoint("");
     setError(undefined);
   }
 
   function continueSetup(): void {
-    if (!provider || !model || appleUnavailable || (cloudProvider && !apiKey.trim())) return;
+    if (!provider || !model || appleUnavailable || customIncomplete ||
+        (cloudProvider && !apiKey.trim())) return;
     setError(undefined);
     setStep("capture");
   }
@@ -701,7 +719,8 @@ function InferenceOnboarding({
   }
 
   async function completeSetup(): Promise<void> {
-    if (!provider || !model || appleUnavailable || (cloudProvider && !apiKey.trim())) return;
+    if (!provider || !model || appleUnavailable || customIncomplete ||
+        (cloudProvider && !apiKey.trim())) return;
     setSaving(true);
     setError(undefined);
     try {
@@ -711,10 +730,12 @@ function InferenceOnboarding({
         captureEmailActivity,
         captureMessagingActivity,
         appPresentationMode: presentationMode,
-        ...(cloudProvider ? { apiKey } : {})
+        ...(cloudProvider ? { apiKey } : {}),
+        ...(provider === "custom" ? { customEndpoint } : {})
       }));
-    } catch {
-      setError("OpenHistory could not finish model setup. Check the selection and try again.");
+    } catch (cause) {
+      setError(cause instanceof Error && cause.message ? cause.message
+        : "OpenHistory could not finish model setup. Check the selection and try again.");
     } finally {
       setSaving(false);
     }
@@ -812,20 +833,48 @@ function InferenceOnboarding({
             <strong id="model-sheet-title">Choose a model</strong>
             <span>{INFERENCE_ONBOARDING_COPY[provider].name}</span>
           </div>
-          <div className="model-choice-list" role="radiogroup" aria-label={`${INFERENCE_ONBOARDING_COPY[provider].name} model`}>
-            {INFERENCE_MODEL_OPTIONS[provider].map((option) => (
-              <label className={`model-choice-row${model === option.id ? " selected" : ""}`} key={option.id}>
+          {provider === "custom" ? (
+            <div className="model-choice-list custom-endpoint-fields">
+              <label className="onboarding-key-field">
+                <span>Endpoint URL</span>
                 <input
-                  checked={model === option.id}
-                  name="onboarding-model"
-                  onChange={() => setModel(option.id)}
-                  type="radio"
-                  value={option.id}
+                  aria-label="Custom endpoint URL"
+                  onChange={(event) => setCustomEndpoint(event.target.value)}
+                  placeholder="https://host[:port]/v1"
+                  type="url"
+                  value={customEndpoint}
                 />
-                <span><strong>{option.label}</strong><small>{option.description}</small></span>
               </label>
-            ))}
-          </div>
+              <label className="onboarding-key-field">
+                <span>Model name</span>
+                <input
+                  aria-label="Custom model name"
+                  onChange={(event) => setModel(event.target.value)}
+                  placeholder="Model name served by the endpoint, for example llama3.1"
+                  type="text"
+                  value={model}
+                />
+              </label>
+              <p className="onboarding-custom-hint">
+                The endpoint must expose an OpenAI-compatible chat completions API (for example Ollama, vLLM, or LM Studio).
+              </p>
+            </div>
+          ) : (
+            <div className="model-choice-list" role="radiogroup" aria-label={`${INFERENCE_ONBOARDING_COPY[provider].name} model`}>
+              {INFERENCE_MODEL_OPTIONS[provider].map((option) => (
+                <label className={`model-choice-row${model === option.id ? " selected" : ""}`} key={option.id}>
+                  <input
+                    checked={model === option.id}
+                    name="onboarding-model"
+                    onChange={() => setModel(option.id)}
+                    type="radio"
+                    value={option.id}
+                  />
+                  <span><strong>{option.label}</strong><small>{option.description}</small></span>
+                </label>
+              ))}
+            </div>
+          )}
 
           {cloudProvider ? (
             <>
@@ -848,7 +897,7 @@ function InferenceOnboarding({
               </label>
               <div className="onboarding-cloud-disclosure">
                 <strong>External processing</strong>
-                <p>About every 10 minutes, OpenHistory will send evidence from completed work sessions directly to {INFERENCE_PROVIDER_LABELS[cloudProvider]}. This can include app names, window titles, URLs or domains, document context, visible interface text, and text changes according to your capture settings. Raw event files remain local.</p>
+                <p>About every 10 minutes, OpenHistory will send evidence from completed work sessions directly to {cloudDestination}. This can include app names, window titles, URLs or domains, document context, visible interface text, and text changes according to your capture settings. Raw event files remain local.</p>
               </div>
             </>
           ) : (
@@ -871,13 +920,16 @@ function InferenceOnboarding({
           {error ? <ErrorMessage>{error}</ErrorMessage> : null}
           <button
             className="primary-button model-onboarding-continue"
-            disabled={saving || !model || appleUnavailable || Boolean(cloudProvider && !apiKey.trim())}
+            disabled={saving || !model || appleUnavailable || customIncomplete ||
+              Boolean(cloudProvider && !apiKey.trim())}
             onClick={continueSetup}
             type="button"
           >
-            {cloudProvider
-              ? `Allow ${INFERENCE_PROVIDER_LABELS[cloudProvider]} and continue`
-              : "Continue"}
+            {cloudProvider === "custom"
+              ? "Allow this endpoint and continue"
+              : cloudProvider
+                ? `Allow ${INFERENCE_PROVIDER_LABELS[cloudProvider]} and continue`
+                : "Continue"}
           </button>
           {cloudProvider ? <p className="onboarding-key-note">Your key is encrypted on this Mac and is never shown again.</p> : null}
           </div>
@@ -1232,7 +1284,7 @@ function PrivacyOnboarding({ onAccept }: { onAccept: () => Promise<void> }): Rea
       </div>
       <ul>
         <li><strong>Stored locally.</strong> Raw activity and generated history live in OpenHistory’s private data directory on this Mac.</li>
-        <li><strong>On-device is distinct from cloud.</strong> Apple’s experimental model stays on this Mac. OpenAI, Anthropic, and Kimi receive selected activity evidence only after a separate confirmation.</li>
+        <li><strong>On-device is distinct from cloud.</strong> Apple’s experimental model stays on this Mac. OpenAI, Anthropic, Kimi, and your custom endpoint receive selected activity evidence only after a separate confirmation.</li>
         <li><strong>Visible and reversible.</strong> Pause capture in the header, exclude apps in Settings, inspect the data folder, or permanently delete all local data.</li>
       </ul>
       <button
@@ -2080,6 +2132,14 @@ function SettingsPage({
     });
   }
 
+  function commitCustomDetails(endpoint: string, model: string): void {
+    void updateInference({
+      ...state.inference.settings,
+      models: { ...state.inference.settings.models, custom: model.trim() },
+      customEndpoint: endpoint.trim() || undefined
+    });
+  }
+
   return (
     <section className="page-stack">
       <div className="card app-location-settings">
@@ -2143,21 +2203,32 @@ function SettingsPage({
               ))}
             </select>
           </label>
-          <label>
-            <span>Model</span>
-            <select
-              disabled={savingApiKey || !state.inference.settings.enabled}
-              onChange={(event) => selectModel(event.target.value)}
-              value={inferenceModel}
-            >
-              {!INFERENCE_MODEL_OPTIONS[inferenceProvider].some(({ id }) => id === inferenceModel) ? (
-                <option value={inferenceModel}>{inferenceModel}</option>
-              ) : null}
-              {INFERENCE_MODEL_OPTIONS[inferenceProvider].map((model) => (
-                <option key={model.id} value={model.id}>{model.label} — {model.description}</option>
-              ))}
-            </select>
-          </label>
+          {inferenceProvider === "custom" ? (
+            <div className="inference-custom-fields">
+              <CustomEndpointFields
+                disabled={savingApiKey}
+                endpoint={state.inference.settings.customEndpoint ?? ""}
+                model={state.inference.settings.models.custom}
+                onCommit={commitCustomDetails}
+              />
+            </div>
+          ) : (
+            <label>
+              <span>Model</span>
+              <select
+                disabled={savingApiKey}
+                onChange={(event) => selectModel(event.target.value)}
+                value={inferenceModel}
+              >
+                {!INFERENCE_MODEL_OPTIONS[inferenceProvider].some(({ id }) => id === inferenceModel) ? (
+                  <option value={inferenceModel}>{inferenceModel}</option>
+                ) : null}
+                {INFERENCE_MODEL_OPTIONS[inferenceProvider].map((model) => (
+                  <option key={model.id} value={model.id}>{model.label} — {model.description}</option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
       </div>
       <PermissionsPage state={state} setState={setState} updateSettings={updateSettings} />
@@ -2227,14 +2298,17 @@ function SettingsPage({
             {savingApiKey ? "Saving…" : "Save"}
           </button>
         </div>
-        <p>Saved keys are encrypted on this Mac, override <code>{apiKeyEnvironmentName(inferenceProvider)}</code>, and are never shown again. Activity evidence is sent directly to {INFERENCE_PROVIDER_LABELS[inferenceProvider]}.</p>
+        <p>Saved keys are encrypted on this Mac, override <code>{apiKeyEnvironmentName(inferenceProvider)}</code>, and are never shown again. Activity evidence is sent directly to {inferenceProvider === "custom" ? "your configured endpoint" : INFERENCE_PROVIDER_LABELS[inferenceProvider]}.</p>
         {apiKeyMessage ? <span className="api-key-message">{apiKeyMessage}</span> : null}
       </form>}
       <div className="card system-list">
         <div className="system-row">
           <span>{state.inference.settings.enabled ? INFERENCE_PROVIDER_LABELS[inferenceProvider] : "Inference"}</span>
           <strong>{state.inference.settings.enabled
-            ? state.inference.configured ? inferenceModel : inferenceProvider === "apple" ? "Unavailable" : "API key missing"
+            ? state.inference.configured ? inferenceModel
+              : inferenceProvider === "apple" ? "Unavailable"
+                : inferenceProvider === "custom" ? "Needs setup"
+                  : "API key missing"
             : "Off"}</strong>
         </div>
         <div className="system-row data-row">
@@ -2310,6 +2384,7 @@ function CloudInferenceDialog({
 }): React.JSX.Element {
   const [apiKey, setApiKey] = useState("");
   const providerLabel = INFERENCE_PROVIDER_LABELS[provider];
+  const destination = provider === "custom" ? "your configured endpoint" : providerLabel;
 
   return (
     <div className="dialog-backdrop" role="presentation">
@@ -2325,8 +2400,8 @@ function CloudInferenceDialog({
         role="dialog"
       >
         <span className="eyebrow">Cloud inference confirmation</span>
-        <h2 id="cloud-dialog-title">Allow {providerLabel} to summarize activity?</h2>
-        <p id="cloud-dialog-description">OpenHistory will send evidence from completed work sessions directly to {providerLabel} about every 10 minutes. Chat requests may also send relevant sanitized history and privacy-filtered activity from a requested recent time window, whether or not it has already been summarized. Evidence may include app names, window titles, URLs or domains, document context, visible interface text, and text changes—according to your capture settings.</p>
+        <h2 id="cloud-dialog-title">Allow {destination} to summarize activity?</h2>
+        <p id="cloud-dialog-description">OpenHistory will send evidence from completed work sessions directly to {destination} about every 10 minutes. Chat requests may also send relevant sanitized history and privacy-filtered activity from a requested recent time window, whether or not it has already been summarized. Evidence may include app names, window titles, URLs or domains, document context, visible interface text, and text changes—according to your capture settings.</p>
         <p>Your raw event files remain local. The provider receives only the evidence assembled for summaries and handles it under its own terms and privacy policy.</p>
         {needsApiKey ? (
           <label className="consent-api-key">
@@ -2503,6 +2578,62 @@ function applicationDisplayName(value: string): string {
   return normalized.length > 10 ? `${normalized.slice(0, 8)}...` : normalized;
 }
 
+function CustomEndpointFields({
+  disabled,
+  endpoint,
+  model,
+  onCommit
+}: {
+  disabled: boolean;
+  endpoint: string;
+  model: string;
+  onCommit: (endpoint: string, model: string) => void;
+}): React.JSX.Element {
+  const [endpointDraft, setEndpointDraft] = useState(endpoint);
+  const [modelDraft, setModelDraft] = useState(model);
+
+  function commit(): void {
+    if (endpointDraft.trim() !== endpoint || modelDraft.trim() !== model) {
+      onCommit(endpointDraft, modelDraft);
+    }
+  }
+
+  return (
+    <>
+      <label className="inference-custom-field">
+        <span>Endpoint URL</span>
+        <input
+          aria-label="Custom endpoint URL"
+          disabled={disabled}
+          onBlur={commit}
+          onChange={(event) => setEndpointDraft(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") commit();
+          }}
+          placeholder="https://host[:port]/v1"
+          type="url"
+          value={endpointDraft}
+        />
+      </label>
+      <label className="inference-custom-field">
+        <span>Model name</span>
+        <input
+          aria-label="Custom model name"
+          disabled={disabled}
+          onBlur={commit}
+          onChange={(event) => setModelDraft(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") commit();
+          }}
+          placeholder="Model name served by the endpoint"
+          type="text"
+          value={modelDraft}
+        />
+      </label>
+    </>
+  );
+}
+
 function apiKeySourceLabel(source: ApiKeySource): string {
   if (source === "saved") return "Saved securely on this Mac";
   if (source === "environment") return "Using the local environment fallback";
@@ -2512,5 +2643,6 @@ function apiKeySourceLabel(source: ApiKeySource): string {
 function apiKeyEnvironmentName(provider: InferenceProvider): string {
   if (provider === "anthropic") return "ANTHROPIC_API_KEY";
   if (provider === "kimi") return "MOONSHOT_API_KEY";
+  if (provider === "custom") return "OPENHISTORY_CUSTOM_API_KEY";
   return "OPENAI_API_KEY";
 }

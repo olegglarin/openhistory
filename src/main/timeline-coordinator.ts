@@ -45,7 +45,9 @@ export class TimelineCoordinator {
 
     try {
       if (!this.inference.configured) throw new Error(this.inference.unavailableMessage);
-      const pending = this.pendingEpisodes().slice(0, MAX_EPISODES_PER_REQUEST);
+      // Newest first: recent activity must reach the timeline before the
+      // older catch-up backlog is digested (pendingEpisodes is chronological).
+      const pending = this.pendingEpisodes().slice(-MAX_EPISODES_PER_REQUEST);
       let itemError: unknown;
       for (const episode of pending) {
         try {
