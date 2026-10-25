@@ -201,7 +201,7 @@ private func generate(
     let model = try languageModel(adapterPath: adapterPath)
     let session = LanguageModelSession(model: model, instructions: instructions)
     let options = GenerationOptions(
-        sampling: .greedy,
+        samplingMode: .greedy,
         maximumResponseTokens: maximumResponseTokens
     )
     let encoder = JSONEncoder()
